@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
+import { Optional } from '@mrdrogdrog/optional';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -151,10 +152,10 @@ describe('Websocket gateway', () => {
     permissionsService = module.get<PermissionsService>(PermissionsService);
 
     jest
-      .spyOn(sessionService, 'extractVerifiedSessionIdFromRequest')
-      .mockImplementation((request: IncomingMessage): string => {
+      .spyOn(sessionService, 'extractSessionIdFromRequest')
+      .mockImplementation((request: IncomingMessage): Optional<string> => {
         if (request.headers.cookie === mockedValidSessionCookie) {
-          return mockedSessionIdWithUser;
+          return Optional.of(mockedSessionIdWithUser);
         } else {
           throw new Error('no valid session cookie found');
         }
