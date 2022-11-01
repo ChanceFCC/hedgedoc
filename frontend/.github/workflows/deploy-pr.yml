@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2021 The HedgeDoc developers (see AUTHORS file)
+#
+# SPDX-License-Identifier: AGPL-3.0-only
+
+name: deploy
+
+on:
+  pull_request:
+
+jobs:
+  deploy:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    name: Deploys to netlify
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn cache
+        uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-18-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-18
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Patch files
+        run: bash netlify/patch-files.sh "https://${{ github.event.number }}--hedgedoc-ui-test.netlify.app/"
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build app
+        run: yarn build:mock
+
+      - name: Remove Next.js cache to avoid it being deployed
+        run: rm -r .next/cache
+
+      - name: Mark GitHub deployment as started
+        uses: bobheadxi/deployments@v1.3.0
+        id: github-deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: "PR #${{ github.event.number }}"
+          override: true
+          ref: ${{ github.head_ref }}
+
+      - name: Run netlify CLI deployment
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: bash netlify/deploy-pr.sh "${{ github.event.number }}" "${{ github.event.pull_request.title }}"
+        id: netlify-result
+
+      - name: Mark GitHub deployment as finished
+        if: always()
+        uses: bobheadxi/deployments@v1.3.0
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env_url: ${{ steps.netlify-result.outputs.url }}
+          env: ${{ steps.github-deployment.outputs.env }}
+          logs: ${{ steps.netlify-result.outputs.logs }}
+          status: ${{ job.status }}
+          deployment_id: ${{ steps.github-deployment.outputs.deployment_id }}
+          override: true
