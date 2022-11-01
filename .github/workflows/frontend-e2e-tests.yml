@@ -92,7 +92,7 @@ jobs:
       - uses: actions/upload-artifact@master
         if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
         with:
-          retention-days: 7
+          retention-days: 1
           name: next-build
           path: |
             frontend/.next

@@ -97,8 +97,12 @@ jobs:
         if: needs.changes.outputs.changed == 'true'
         run: rm -r .next/cache
 
+      - name: Install netlify CLI
+        if: needs.changes.outputs.changed == 'true'
+        run: "npm install -g netlify-cli@${{ env.NETLIFY_VERSION }}"
+
       - name: Run netlify CLI deployment
         if: needs.changes.outputs.changed == 'true'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        run: "/usr/bin/npx --yes netlify-cli@${{ env.NETLIFY_VERSION }} deploy --build --prod --message \"${{ github.event.head_commit.id }}: ${{ github.event.head_commit.message }}\""
+        run: "netlify deploy --build --prod --message \"${{ github.event.head_commit.id }}: ${{ github.event.head_commit.message }}\""

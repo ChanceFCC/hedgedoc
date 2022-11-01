@@ -51,7 +51,7 @@ jobs:
 
   deploy:
     needs: changes
-    if: github.event.pull_request.draft == false || contains( github.event.pull_request.labels.*.name, 'ci:force deployment')
+    if: "github.event.pull_request.draft == false || contains( github.event.pull_request.labels.*.name, 'ci: force deployment')"
     runs-on: ubuntu-latest
     name: Deploys to netlify
     env:
@@ -121,11 +121,15 @@ jobs:
           override: true
           ref: ${{ github.head_ref }}
 
-      - name: Run netlify CLI deployment
+      - name: Install netlify CLI
+        if: needs.changes.outputs.changed == 'true'
+        run: "npm install -g netlify-cli@${{ env.NETLIFY_VERSION }}"
+
+      - name: Run netlify CLI
         if: needs.changes.outputs.changed == 'true'
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        run: "/usr/bin/npx --yes netlify-cli@${{ env.NETLIFY_VERSION }} deploy --build --context deploy-preview --alias \"${{ github.event.number }}\" --json --message \"PR #${{ github.event.number }}\""
+        run: "netlify deploy --build --context deploy-preview --alias \"${{ github.event.number }}\" --json --message \"PR #${{ github.event.number }}\""
 
       - name: Mark GitHub deployment as finished
         if: needs.changes.outputs.changed == 'true'
