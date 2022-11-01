@@ -13,8 +13,8 @@ import { StoreProvider } from '../redux/store-provider'
 import { UiNotificationBoundary } from '../components/notifications/ui-notification-boundary'
 import { ExpectedOriginBoundary } from '../utils/uri-origin-boundary'
 import React from 'react'
-import { BaseUrlContextProvider } from '../components/common/base-url/base-url-context-provider'
 import type { BaseUrls } from '../components/common/base-url/base-url-context-provider'
+import { BaseUrlContextProvider } from '../components/common/base-url/base-url-context-provider'
 import { BaseUrlFromEnvExtractor } from '../utils/base-url-from-env-extractor'
 
 interface AppPageProps {

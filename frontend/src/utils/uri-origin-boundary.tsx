@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { Fragment, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
+import React, { Fragment, useMemo } from 'react'
 import { isClientSideRendering } from './is-client-side-rendering'
 import { useBaseUrl } from '../hooks/common/use-base-url'
 

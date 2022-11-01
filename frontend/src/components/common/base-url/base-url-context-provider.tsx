@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { createContext, useState } from 'react'
 import type { PropsWithChildren } from 'react'
+import React, { createContext, useState } from 'react'
 
 export interface BaseUrls {
   renderer: string

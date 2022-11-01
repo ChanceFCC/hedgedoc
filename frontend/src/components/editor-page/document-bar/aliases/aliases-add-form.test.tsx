@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import { render, act, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import testEvent from '@testing-library/user-event'
 import React from 'react'
 import { mockI18n } from '../../../markdown-renderer/test-utils/mock-i18n'

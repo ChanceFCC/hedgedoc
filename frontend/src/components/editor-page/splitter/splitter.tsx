@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import type { ReactElement, TouchEvent, MouseEvent } from 'react'
+import type { MouseEvent, ReactElement, TouchEvent } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DividerButtonsShift, SplitDivider } from './split-divider/split-divider'
 import styles from './splitter.module.scss'

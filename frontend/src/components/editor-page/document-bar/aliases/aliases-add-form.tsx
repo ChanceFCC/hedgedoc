@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: AGPL-3.0-only
  */
-import React, { useCallback, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Button, Form, InputGroup } from 'react-bootstrap'
 import { ForkAwesomeIcon } from '../../../common/fork-awesome/fork-awesome-icon'
 import { useTranslation } from 'react-i18next'

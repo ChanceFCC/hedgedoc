@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 import { render } from '@testing-library/react'
-import React from 'react'
 import type { PropsWithChildren } from 'react'
+import React from 'react'
 import type { CommonModalProps } from '../../../common/modals/common-modal'
 import * as CommonModalModule from '../../../common/modals/common-modal'
 import * as AliasesListModule from './aliases-list'

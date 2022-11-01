@@ -9,8 +9,8 @@ import React from 'react'
 import { mockI18n } from '../../../markdown-renderer/test-utils/mock-i18n'
 import type { Alias } from '../../../../api/alias/types'
 import * as useApplicationStateModule from '../../../../hooks/common/use-application-state'
-import * as AliasesListEntryModule from './aliases-list-entry'
 import type { AliasesListEntryProps } from './aliases-list-entry'
+import * as AliasesListEntryModule from './aliases-list-entry'
 import { AliasesList } from './aliases-list'
 
 jest.mock('../../../../hooks/common/use-application-state')

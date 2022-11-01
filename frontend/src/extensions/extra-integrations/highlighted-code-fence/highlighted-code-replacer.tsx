@@ -6,11 +6,11 @@
 
 import type { Element } from 'domhandler'
 import React from 'react'
+import type { NodeReplacement } from '../../../components/markdown-renderer/replace-components/component-replacer'
 import {
   ComponentReplacer,
   DO_NOT_REPLACE
 } from '../../../components/markdown-renderer/replace-components/component-replacer'
-import type { NodeReplacement } from '../../../components/markdown-renderer/replace-components/component-replacer'
 import { HighlightedCode } from './highlighted-code'
 
 /**

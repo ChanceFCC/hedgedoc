@@ -6,8 +6,8 @@
 import { render } from '@testing-library/react'
 import { YouTubeFrame } from './youtube-frame'
 import React from 'react'
-import * as ClickShieldModule from '../../../components/markdown-renderer/replace-components/click-shield/click-shield'
 import type { ClickShieldProps } from '../../../components/markdown-renderer/replace-components/click-shield/click-shield'
+import * as ClickShieldModule from '../../../components/markdown-renderer/replace-components/click-shield/click-shield'
 
 jest.mock('../../../components/markdown-renderer/replace-components/click-shield/click-shield')
 

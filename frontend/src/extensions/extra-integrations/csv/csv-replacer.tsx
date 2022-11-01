@@ -7,11 +7,11 @@
 import type { Element } from 'domhandler'
 import React from 'react'
 import type { NodeReplacement } from '../../../components/markdown-renderer/replace-components/component-replacer'
-import { CsvTable } from './csv-table'
 import {
   ComponentReplacer,
   DO_NOT_REPLACE
 } from '../../../components/markdown-renderer/replace-components/component-replacer'
+import { CsvTable } from './csv-table'
 import { CodeBlockComponentReplacer } from '../../../components/markdown-renderer/replace-components/code-block-component-replacer'
 
 /**

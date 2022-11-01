@@ -1,0 +1,182 @@
+# SPDX-FileCopyrightText: 2021 The HedgeDoc developers (see AUTHORS file)
+#
+# SPDX-License-Identifier: AGPL-3.0-only
+
+name: Frontend / Run E2E Tests
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 18
+
+defaults:
+  run:
+    working-directory: frontend
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Check for frontend changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      changed: ${{ steps.changed.outputs.files }}
+    steps:
+      - name: Check for frontend file changes
+        uses: dorny/paths-filter@v2
+        id: changed
+        with:
+          filters: |
+            files:
+              - 'frontend/**'
+              - '.github/**'
+              - '.yarn/**'
+
+  build-frontend:
+    needs: changes
+    runs-on: ubuntu-latest
+    name: Build test build of frontend
+    steps:
+      - name: Check out repo
+        if: needs.changes.outputs.changed == 'true'
+        uses: actions/checkout@v3
+
+      - name: Cache build
+        if: needs.changes.outputs.changed == 'true'
+        uses: actions/cache@v3
+        id: build-cache
+        with:
+          path: frontend/.next
+          key: build-${{ github.sha }}
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn cache
+        uses: actions/cache@v3
+        id: yarn-cache
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('frontend/yarn.lock') }}
+
+      - name: Set up NodeJS
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: frontend/yarn.lock
+          cache: 'yarn'
+
+      - name: Install dependencies
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        run: yarn install --immutable
+
+      - name: Build test production build
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        run: yarn build:test
+
+      - uses: actions/upload-artifact@master
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        with:
+          retention-days: 7
+          name: next-build
+          path: |
+            frontend/.next
+            !frontend/.next/cache
+            !frontend/.next/standalone
+
+  end2end:
+    name: Perform E2E Test in ${{ matrix.browser }}
+    needs:
+      - build-frontend
+      - changes
+    runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node18.6.0-chrome105-ff104
+      options: --user 1001 --shm-size=2g
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [ 'chrome' ]
+        containers: [ 1 ] # increase before merge 1, 2, 3, 4, 5
+    steps:
+      - name: Check out repo
+        if: needs.changes.outputs.changed == 'true'
+        uses: actions/checkout@v3
+
+      - name: Cache build
+        if: needs.changes.outputs.changed == 'true'
+        uses: actions/cache@v3
+        id: build-cache
+        with:
+          path: frontend/.next
+          key: build-${{ github.sha }}
+
+      - name: Get yarn cache directory path
+        if: needs.changes.outputs.changed == 'true'
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn cache
+        if: needs.changes.outputs.changed == 'true'
+        uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('frontend/yarn.lock') }}
+
+      - name: Set up NodeJS
+        if: steps.build-cache.outputs.cache-hit != 'true' && needs.changes.outputs.changed == 'true'
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache-dependency-path: frontend/yarn.lock
+          cache: 'yarn'
+
+      - name: Install dependencies
+        if: needs.changes.outputs.changed == 'true'
+        run: yarn install --immutable
+
+      - name: Download built frontend
+        if: needs.changes.outputs.changed == 'true'
+        uses: actions/download-artifact@master
+        with:
+          name: next-build
+          path: frontend/.next
+
+      - name: Run server
+        if: needs.changes.outputs.changed == 'true'
+        run: yarn start:ci &
+        env:
+          NODE_ENV: test
+
+      - name: Wait for server
+        if: needs.changes.outputs.changed == 'true'
+        run: "sleep 3 && curl --max-time 120 http://127.0.0.1:3001/"
+
+      - name: Run cypress
+        if: needs.changes.outputs.changed == 'true'
+        run: "yarn cy:run:${{ matrix.browser }} --record true --parallel --group \"UI - ${{ matrix.browser }}\""
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@master
+        if: needs.changes.outputs.changed == 'true'
+        with:
+          name: screenshots
+          path: cypress/screenshots

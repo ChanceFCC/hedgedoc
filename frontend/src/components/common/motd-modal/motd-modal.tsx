@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 import { CommonModal } from '../modals/common-modal'
 import { Trans, useTranslation } from 'react-i18next'
