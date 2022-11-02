@@ -1,0 +1,10 @@
+{
+  "name": "hedgedoc",
+  "version": "2.0.0-dev",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "packageManager": "yarn@3.2.4"
+}
